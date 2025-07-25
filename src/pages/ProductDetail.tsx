@@ -5,11 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Simulated API data: GET /api/product/:id
   const mockProduct = {
@@ -121,8 +124,9 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background py-12">
+  return (
+    <div className="min-h-screen bg-background py-12">
+      <Navigation />
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 animate-pulse">
             <div className="w-full h-96 bg-muted rounded-xl" />
@@ -141,7 +145,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
         {/* Back Button */}
-        <Button variant="ghost" className="mb-6" onClick={() => window.history.back()}>
+        <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Results
         </Button>

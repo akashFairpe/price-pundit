@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 
 const Search = () => {
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [interpretedQuery, setInterpretedQuery] = useState(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,12 +54,12 @@ const Search = () => {
   };
 
   const handleFindDeals = () => {
-    // Navigate to results page
-    window.location.href = "/results";
+    navigate("/results");
   };
 
   return (
     <div className="min-h-screen bg-hero-gradient">
+      <Navigation />
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">

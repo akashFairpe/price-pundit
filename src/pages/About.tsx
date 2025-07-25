@@ -2,8 +2,11 @@ import { Heart, Brain, Users, Zap, Award, Target, Shield, Sparkles } from "lucid
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 
 const About = () => {
+  const navigate = useNavigate();
   const teamMembers = [
     {
       name: "Ravi Kumar",
@@ -69,6 +72,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navigation />
       {/* Hero Section */}
       <section className="py-20 bg-hero-gradient">
         <div className="container mx-auto px-4 text-center">
@@ -245,13 +249,13 @@ const About = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => window.location.href = "/feedback"}
+                onClick={() => navigate("/feedback")}
                 className="btn-hero-primary"
               >
                 Share Your Feedback
               </Button>
               <Button 
-                onClick={() => window.location.href = "/"}
+                onClick={() => navigate("/")}
                 variant="outline"
                 className="px-8"
               >

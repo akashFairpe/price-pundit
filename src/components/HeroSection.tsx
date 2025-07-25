@@ -1,17 +1,18 @@
 import { Camera, MessageSquare, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   const handleImageUpload = () => {
-    // POST /api/upload
-    console.log("Upload image clicked");
+    navigate("/search");
   };
 
   const handlePromptSearch = () => {
-    // POST /api/prompt-search
-    console.log("Prompt search clicked");
+    navigate("/search");
   };
 
   return (

@@ -5,12 +5,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 
 const Results = () => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState("best-match");
   const [priceRange, setPriceRange] = useState([0, 50000]);
+  const navigate = useNavigate();
 
   // Simulated API data: GET /api/deals?query=desk
   const mockProducts = [
@@ -102,6 +105,7 @@ const Results = () => {
 
   return (
     <div className="min-h-screen bg-background py-12">
+      <Navigation />
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -268,7 +272,7 @@ const Results = () => {
 
                     {/* Actions */}
                     <div className="flex gap-2 mt-4">
-                      <Button className="flex-1" onClick={() => window.location.href = `/product/${product.id}`}>
+                      <Button className="flex-1" onClick={() => navigate(`/product/${product.id}`)}>
                         View Details
                       </Button>
                       <Button variant="outline" size="icon">

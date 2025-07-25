@@ -5,11 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Simulated API data: GET /api/wishlist
   const mockWishlistItems = [
@@ -104,7 +107,7 @@ const Wishlist = () => {
   };
 
   const handleViewDeals = (itemId: number) => {
-    window.location.href = `/product/${itemId}`;
+    navigate(`/product/${itemId}`);
   };
 
   const totalSavings = wishlistItems
@@ -115,8 +118,9 @@ const Wishlist = () => {
     }, 0);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background py-12">
+  return (
+    <div className="min-h-screen bg-background py-12">
+      <Navigation />
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
@@ -181,7 +185,7 @@ const Wishlist = () => {
             <p className="text-muted-foreground mb-6">
               Start adding products you love and we'll track the best deals for you
             </p>
-            <Button onClick={() => window.location.href = "/"}>
+            <Button onClick={() => navigate("/")}>
               Start Shopping
             </Button>
           </Card>

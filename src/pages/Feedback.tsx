@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 
 const Feedback = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +21,7 @@ const Feedback = () => {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const categories = [
     "Overall Experience",
@@ -99,7 +102,7 @@ const Feedback = () => {
           </p>
           <div className="space-y-3">
             <Button 
-              onClick={() => window.location.href = "/"}
+              onClick={() => navigate("/")}
               className="w-full btn-hero-primary"
             >
               Continue Shopping
@@ -128,6 +131,7 @@ const Feedback = () => {
 
   return (
     <div className="min-h-screen bg-hero-gradient py-12">
+      <Navigation />
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -295,10 +299,10 @@ const Feedback = () => {
               For urgent issues or detailed support, you can also reach us directly
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="outline" onClick={() => window.location.href = "mailto:support@aidealfinder.com"}>
+              <Button variant="outline" onClick={() => navigate("mailto:support@aidealfinder.com")}>
                 Email Support
               </Button>
-              <Button variant="outline" onClick={() => window.location.href = "/about"}>
+              <Button variant="outline" onClick={() => navigate("/about")}>
                 Learn More About Us
               </Button>
             </div>
