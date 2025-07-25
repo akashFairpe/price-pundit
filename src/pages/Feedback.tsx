@@ -32,7 +32,7 @@ const Feedback = () => {
   ];
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
