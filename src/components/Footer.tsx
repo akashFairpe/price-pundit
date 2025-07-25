@@ -1,4 +1,5 @@
 import { Heart, Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -25,10 +26,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-background/70">
-              <li><a href="#how-it-works" className="hover:text-primary-glow transition-colors">How It Works</a></li>
-              <li><a href="#platforms" className="hover:text-primary-glow transition-colors">Supported Platforms</a></li>
-              <li><a href="#categories" className="hover:text-primary-glow transition-colors">Categories</a></li>
-              <li><a href="#about" className="hover:text-primary-glow transition-colors">About Us</a></li>
+              <li><Link to="/search" className="hover:text-primary-glow transition-colors">Search Products</Link></li>
+              <li><Link to="/results" className="hover:text-primary-glow transition-colors">Browse Deals</Link></li>
+              <li><Link to="/wishlist" className="hover:text-primary-glow transition-colors">My Wishlist</Link></li>
+              <li><Link to="/about" className="hover:text-primary-glow transition-colors">About Us</Link></li>
             </ul>
           </div>
 
@@ -36,10 +37,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-background/70">
-              <li><a href="#help" className="hover:text-primary-glow transition-colors">Help Center</a></li>
-              <li><a href="#contact" className="hover:text-primary-glow transition-colors">Contact Us</a></li>
-              <li><a href="#feedback" className="hover:text-primary-glow transition-colors">Feedback</a></li>
-              <li><a href="#privacy" className="hover:text-primary-glow transition-colors">Privacy Policy</a></li>
+              <li><Link to="/about" className="hover:text-primary-glow transition-colors">Help Center</Link></li>
+              <li><Link to="/feedback" className="hover:text-primary-glow transition-colors">Contact Us</Link></li>
+              <li><Link to="/feedback" className="hover:text-primary-glow transition-colors">Feedback</Link></li>
+              <li><Link to="/about" className="hover:text-primary-glow transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

@@ -1,7 +1,10 @@
 import { Home, Utensils, Dumbbell, Smartphone, Laptop, Car, Baby, Shirt } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const CategoriesSection = () => {
+  const navigate = useNavigate();
   // Simulated API data: GET /api/categories
   const categories = [
     {
@@ -82,6 +85,7 @@ const CategoriesSection = () => {
               <Card 
                 key={index} 
                 className="card-soft p-6 text-center cursor-pointer group hover:scale-105 transition-all duration-300 hover:shadow-glow"
+                onClick={() => navigate("/search")}
               >
                 {/* Icon with Gradient Background */}
                 <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${category.gradient} flex items-center justify-center transform group-hover:scale-110 transition-transform`}>
@@ -116,7 +120,13 @@ const CategoriesSection = () => {
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
             Our AI can understand and find deals for virtually any product. Just describe what you're looking for or upload an image!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              onClick={() => navigate("/search")}
+              className="btn-hero-primary"
+            >
+              Start Searching Now
+            </Button>
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full">
               <span className="text-sm font-medium">Electronics • Furniture • Sports • Books • And More!</span>
             </div>

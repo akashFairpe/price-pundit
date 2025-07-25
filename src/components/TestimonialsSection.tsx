@@ -1,9 +1,12 @@
 import { Star, Quote } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 import testimonialImage from "@/assets/testimonial-people.jpg";
 
 const TestimonialsSection = () => {
+  const navigate = useNavigate();
   // Simulated API data: GET /api/testimonials
   const testimonials = [
     {
@@ -119,6 +122,14 @@ const TestimonialsSection = () => {
               ))}
             </div>
             <span className="font-medium">Join 100,000+ happy users saving money daily</span>
+          </div>
+          <div className="mt-8">
+            <Button 
+              onClick={() => navigate("/search")}
+              className="btn-hero-primary"
+            >
+              Start Saving Money Today
+            </Button>
           </div>
         </div>
       </div>
