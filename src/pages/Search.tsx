@@ -19,17 +19,17 @@ const Search = () => {
     if (!file) return;
 
     setIsProcessing(true);
-    // Simulate API call: POST /api/upload
+    // Simulate API call: POST /api/problem-image
     setTimeout(() => {
       setInterpretedQuery({
-        product: "Ergonomic Office Chair",
-        confidence: 0.92,
-        features: ["Lumbar support", "Adjustable height", "Breathable mesh"]
+        problemDetected: "Cluttered Workspace",
+        categories: ["Desk Organizer", "Cable Management", "Monitor Stand"],
+        confidence: 0.93
       });
       setIsProcessing(false);
       toast({
-        title: "Image analyzed successfully!",
-        description: "We found a great match for your product."
+        title: "Problem analyzed successfully!",
+        description: "We detected your space issue and found solutions."
       });
     }, 2000);
   };
@@ -41,14 +41,14 @@ const Search = () => {
     // Simulate API call: POST /api/prompt-search
     setTimeout(() => {
       setInterpretedQuery({
-        intent: "Study Desk",
-        features: ["Laptop area", "Water bottle holder", "Pen organizer"],
+        problemDetected: "Need for organized workspace",
+        categories: ["Storage Solutions", "Desk Accessories", "Space-saving furniture"],
         confidence: 0.88
       });
       setIsProcessing(false);
       toast({
-        title: "Prompt analyzed successfully!",
-        description: "We understand what you're looking for."
+        title: "Need analyzed successfully!",
+        description: "We understand your space requirements."
       });
     }, 1500);
   };
@@ -84,9 +84,9 @@ const Search = () => {
                 <div className="inline-flex p-4 rounded-xl bg-primary/10 text-primary mb-6">
                   <Camera className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Upload Product Image</h3>
+                <h3 className="text-2xl font-semibold mb-4">🖼️ Upload Problem Photo</h3>
                 <p className="text-muted-foreground mb-6">
-                  Take a photo or upload an image of the product you're looking for
+                  Upload an image of your space problem (cluttered desk, disorganized room, etc.)
                 </p>
                 
                 <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors">
@@ -112,15 +112,15 @@ const Search = () => {
                 <div className="inline-flex p-4 rounded-xl bg-accent/10 text-accent mb-6">
                   <MessageSquare className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Describe Your Needs</h3>
+                <h3 className="text-2xl font-semibold mb-4">💬 Describe Your Problem</h3>
                 <p className="text-muted-foreground">
-                  Tell us what you're looking for in natural language
+                  Describe your space problem or what you need to organize
                 </p>
               </div>
               
               <div className="space-y-4">
                 <Textarea
-                  placeholder="I need a desk with space for a laptop, bottle holder, and stationery..."
+                  placeholder="My room feels too crowded. I need space-saving furniture..."
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   className="min-h-[120px] resize-none"
@@ -155,24 +155,24 @@ const Search = () => {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold mb-2">AI Analysis Complete</h4>
+                  <h4 className="font-semibold mb-2">🧠 Problem Analysis Complete</h4>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Product Match:</p>
-                      <p className="font-medium">{interpretedQuery.product || interpretedQuery.intent}</p>
+                      <p className="text-sm text-muted-foreground mb-1">Problem Detected:</p>
+                      <p className="font-medium">{interpretedQuery.problemDetected}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Confidence:</p>
                       <p className="font-medium text-success">{Math.round(interpretedQuery.confidence * 100)}%</p>
                     </div>
                   </div>
-                  {interpretedQuery.features && (
+                  {interpretedQuery.categories && (
                     <div className="mt-3">
-                      <p className="text-sm text-muted-foreground mb-2">Key Features:</p>
+                      <p className="text-sm text-muted-foreground mb-2">📌 Suggested Solutions:</p>
                       <div className="flex flex-wrap gap-2">
-                        {interpretedQuery.features.map((feature, index) => (
+                        {interpretedQuery.categories.map((category, index) => (
                           <span key={index} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-                            {feature}
+                            {category}
                           </span>
                         ))}
                       </div>
@@ -187,7 +187,7 @@ const Search = () => {
           {interpretedQuery && (
             <div className="text-center animate-fade-in">
               <Button onClick={handleFindDeals} className="btn-hero-primary text-xl px-12 py-6">
-                Find Best Deals
+                Find Solutions & Deals
                 <ArrowRight className="w-6 h-6 ml-3" />
               </Button>
             </div>
@@ -198,12 +198,12 @@ const Search = () => {
             <h4 className="font-semibold mb-4 text-center">Try These Sample Searches</h4>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {[
-                "Gaming chair with RGB lighting and lumbar support",
-                "Wireless headphones with noise cancellation under ₹5000",
-                "Kitchen mixer grinder with multiple jars",
-                "Laptop bag that fits 15.6 inch laptop with extra compartments",
-                "Running shoes for morning jogs, size 9",
-                "Office desk lamp with adjustable brightness"
+                "My workspace is cluttered with cables everywhere",
+                "My small apartment needs space-saving storage solutions",
+                "Kitchen counter is always messy, need organization",
+                "My study table has no space for books and laptop together",
+                "Bedroom closet is overflowing, need better storage",
+                "Home office corner feels cramped and disorganized"
               ].map((sample, index) => (
                 <button
                   key={index}

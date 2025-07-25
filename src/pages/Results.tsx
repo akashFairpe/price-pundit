@@ -110,9 +110,9 @@ const Results = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold mb-4">
-            Search Results for <span className="text-primary">"Study Desk"</span>
+            We analyzed your space and found these smart solutions
           </h1>
-          <p className="text-muted-foreground">Found {products.length} perfect matches • Updated 2 minutes ago</p>
+          <p className="text-muted-foreground">Found {products.length} solution products • Based on problem analysis</p>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-6">
