@@ -53,12 +53,12 @@ const HeroSection = () => {
 
           {/* Main Headline */}
           <h1 className="text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent animate-fade-in">
-            Find the Best Deals with the Power of AI
+            Solve Your Space Problems with Smart AI
           </h1>
 
           {/* Subtitle */}
           <p className="text-xl lg:text-2xl text-muted-foreground mb-12 leading-relaxed animate-fade-in">
-            Upload a product image or describe what you need. Our AI instantly finds the best deals across Amazon, Flipkart, eBay, and more.
+            Upload a photo of your cluttered space or describe your organization problem. Our AI analyzes the issue and finds the perfect solutions across top platforms.
           </p>
 
           {/* CTA Buttons */}
@@ -68,7 +68,7 @@ const HeroSection = () => {
               className="btn-hero-primary group"
             >
               <Camera className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
-              Upload a Product Image
+              Upload Problem Photo
             </Button>
             
             <Button 
@@ -76,15 +76,15 @@ const HeroSection = () => {
               className="btn-hero-secondary group"
             >
               <MessageSquare className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
-              Describe Your Needs
+              Describe Your Problem
             </Button>
           </div>
 
           {/* Trust Indicators */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-2xl mx-auto animate-fade-in">
             {[
-              { label: "Products Analyzed", value: "10M+" },
-              { label: "Deals Found", value: "2.5M+" },
+              { label: "Spaces Analyzed", value: "500K+" },
+              { label: "Problems Solved", value: "2.5M+" },
               { label: "Money Saved", value: "₹50Cr+" },
               { label: "Happy Users", value: "100K+" }
             ].map((stat, index) => (

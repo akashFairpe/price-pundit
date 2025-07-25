@@ -12,25 +12,25 @@ const TestimonialsSection = () => {
     {
       name: "Ankit Sharma",
       photo: testimonialImage,
-      review: "Saved ₹2,000 on my work desk! The AI found exactly what I needed and compared prices across 5 platforms instantly.",
+      review: "My cluttered home office was a mess! Uploaded a photo and got perfect organizer recommendations. Saved ₹2,000 and my space looks amazing!",
       rating: 5,
-      product: "Ergonomic Office Desk",
+      product: "Desk Organization Kit",
       savings: "₹2,000"
     },
     {
       name: "Neha Patel",
       photo: testimonialImage,
-      review: "Love how it understands my needs! Just described 'comfortable running shoes for morning jogs' and got perfect matches.",
+      review: "Described my cramped kitchen storage problem and instantly got space-saving solutions. The AI really understands what I needed!",
       rating: 5,
-      product: "Running Shoes",
+      product: "Kitchen Storage Set",
       savings: "₹1,500"
     },
     {
       name: "Raj Kumar",
       photo: testimonialImage,
-      review: "The price tracking feature is amazing. Got notified when my laptop went on sale and saved 15%!",
+      review: "Small apartment, big storage problems. The AI analyzed my space photo and suggested furniture that actually fits. Life-changing!",
       rating: 5,
-      product: "Gaming Laptop",
+      product: "Space-saving Furniture",
       savings: "₹8,000"
     }
   ];
@@ -49,7 +49,7 @@ const TestimonialsSection = () => {
             What Our <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Users</span> Say
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Join thousands of happy customers who save money every day with our AI-powered deal finder
+            Join thousands of happy customers who solve their space problems and save money with our AI-powered solution finder
           </p>
           
           {/* Stats */}
@@ -121,14 +121,14 @@ const TestimonialsSection = () => {
                 </div>
               ))}
             </div>
-            <span className="font-medium">Join 100,000+ happy users saving money daily</span>
+            <span className="font-medium">Join 100,000+ users solving space problems daily</span>
           </div>
           <div className="mt-8">
             <Button 
               onClick={() => navigate("/search")}
               className="btn-hero-primary"
             >
-              Start Saving Money Today
+              Start Solving Your Space Problems
             </Button>
           </div>
         </div>

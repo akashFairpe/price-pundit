@@ -81,11 +81,11 @@ const About = () => {
             <span className="text-sm font-medium">Our Story</span>
           </div>
           <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-            Built to Help You <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Shop Smarter</span>
+            Built to Help You <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Organize Smarter</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            We believe everyone deserves access to the best deals without spending hours searching. 
-            Our AI-powered platform makes intelligent shopping effortless, saving you time and money on every purchase.
+            We believe everyone deserves a well-organized, clutter-free space without the stress of figuring out what to buy. 
+            Our AI-powered platform analyzes your space problems and finds the perfect organization solutions.
           </p>
         </div>
       </section>
@@ -96,28 +96,28 @@ const About = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold mb-6">Our Mission</h2>
-              <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                To democratize smart shopping by leveraging artificial intelligence. We're on a mission to eliminate 
-                the frustration of endless price comparisons and product searches, making the best deals accessible 
-                to everyone with just a simple image upload or text description.
-              </p>
+          <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+            To revolutionize space organization by leveraging artificial intelligence. We're on a mission to eliminate 
+            the frustration of cluttered spaces and endless product searches, making smart organization solutions accessible 
+            to everyone with just a simple photo upload or problem description.
+          </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-primary mb-1">2.5M+</div>
-                  <div className="text-sm text-muted-foreground">Deals Found</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-accent mb-1">₹50Cr+</div>
-                  <div className="text-sm text-muted-foreground">Money Saved</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-primary-glow mb-1">100K+</div>
-                  <div className="text-sm text-muted-foreground">Happy Users</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-success mb-1">99.2%</div>
-                  <div className="text-sm text-muted-foreground">Accuracy Rate</div>
-                </div>
+            <div className="text-3xl font-bold text-primary mb-1">2.5M+</div>
+            <div className="text-sm text-muted-foreground">Problems Solved</div>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-3xl font-bold text-accent mb-1">₹50Cr+</div>
+            <div className="text-sm text-muted-foreground">Money Saved</div>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-3xl font-bold text-primary-glow mb-1">100K+</div>
+            <div className="text-sm text-muted-foreground">Organized Spaces</div>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-3xl font-bold text-success mb-1">99.2%</div>
+            <div className="text-sm text-muted-foreground">Problem Detection Rate</div>
+          </div>
               </div>
             </div>
             <Card className="card-gradient p-8">
@@ -127,19 +127,19 @@ const About = () => {
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                   <p className="text-muted-foreground">
-                    <strong className="text-foreground">AI-Powered Visual Search:</strong> Upload any product image and our AI instantly understands what you're looking for
+                    <strong className="text-foreground">AI-Powered Problem Detection:</strong> Upload any space photo and our AI instantly identifies organization issues and clutter problems
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-accent rounded-full mt-2 flex-shrink-0" />
                   <p className="text-muted-foreground">
-                    <strong className="text-foreground">Multi-Platform Integration:</strong> We search across Amazon, Flipkart, eBay, and more simultaneously
+                    <strong className="text-foreground">Smart Solution Matching:</strong> We find the perfect organization products across Amazon, Flipkart, and more
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-primary-glow rounded-full mt-2 flex-shrink-0" />
                   <p className="text-muted-foreground">
-                    <strong className="text-foreground">Natural Language Processing:</strong> Describe products in your own words and get perfect matches
+                    <strong className="text-foreground">Natural Problem Description:</strong> Describe your space challenges in your own words and get perfect solutions
                   </p>
                 </div>
               </div>
@@ -179,9 +179,9 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-6">Meet Our Team</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              The passionate individuals building the future of intelligent shopping
-            </p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            The passionate individuals building the future of intelligent space organization
+          </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {teamMembers.map((member, index) => (

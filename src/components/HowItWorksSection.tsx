@@ -5,20 +5,20 @@ const HowItWorksSection = () => {
   const steps = [
     {
       icon: Upload,
-      title: "Upload Image",
-      description: "Take a photo or upload an image of any product you're looking for",
+      title: "Upload Problem Photo",
+      description: "Take a photo of your cluttered space or disorganized area that needs solutions",
       color: "text-primary"
     },
     {
       icon: Search,
-      title: "AI Matches Product",
-      description: "Our advanced AI analyzes your image and understands what you're looking for",
+      title: "AI Analyzes Problem",
+      description: "Our AI detects the specific organization issues and identifies what solutions you need",
       color: "text-accent"
     },
     {
       icon: ShoppingCart,
-      title: "See Best Deals",
-      description: "Get instant price comparisons across multiple platforms with the best deals",
+      title: "Get Smart Solutions",
+      description: "Receive targeted product recommendations and deals that solve your specific space problems",
       color: "text-primary-glow"
     }
   ];
@@ -31,7 +31,7 @@ const HowItWorksSection = () => {
             How It <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Works</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Three simple steps to find the best deals with AI-powered product matching
+            Three simple steps to solve your space problems with AI-powered solution matching
           </p>
         </div>
 
