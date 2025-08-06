@@ -102,11 +102,70 @@ const ProductDetail = () => {
   ];
 
   useEffect(() => {
-    // Simulate API loading
-    setTimeout(() => {
+    // Get product data from URL params or localStorage
+    const searchResults = localStorage.getItem('searchResults');
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = window.location.pathname.split('/').pop();
+    
+    if (searchResults && productId) {
+      try {
+        const apiData = JSON.parse(searchResults);
+        const foundProduct = apiData.find(item => item.productId === productId);
+        
+        if (foundProduct) {
+          // Transform API data to component format
+          const cleanImages = foundProduct.images
+            ?.map(url => {
+              if (!url.includes('/images/I')) return null;
+              const match = url.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
+              return match ? match[1] + '.jpg' : null;
+            })
+            ?.filter(Boolean) || [];
+          
+          const transformedProduct = {
+            id: foundProduct.productId,
+            name: foundProduct.title || "Product",
+            images: cleanImages.length > 0 ? cleanImages : ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800"],
+            currentImage: 0,
+            aiReasoning: foundProduct.why_good_choice || "This product matches your needs perfectly.",
+            rating: foundProduct.rating?.rating || 4.0,
+            reviews: foundProduct.rating?.ratingCount || 0,
+            matchScore: parseInt(foundProduct.matchPercentage?.replace('%', '')) || 85,
+            features: foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
+            dimensions: "Standard Size",
+            weight: "Standard Weight", 
+            warranty: "1 Year Warranty",
+            vendors: [{
+              name: "Amazon",
+              price: foundProduct.price?.price || "₹0",
+              originalPrice: foundProduct.price?.mrp || null,
+              discount: foundProduct.price?.discount || null,
+              rating: foundProduct.rating?.rating || 4.0,
+              shipping: "Free Delivery",
+              availability: "In Stock",
+              url: foundProduct.productUrl || "#"
+            }],
+            priceHistory: [
+              { date: "Jan", price: 7999 },
+              { date: "Feb", price: 7500 },
+              { date: "Mar", price: 6999 },
+              { date: "Apr", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499 }
+            ]
+          };
+          
+          setProduct(transformedProduct);
+        } else {
+          setProduct(mockProduct);
+        }
+      } catch (error) {
+        console.error('Error parsing product data:', error);
+        setProduct(mockProduct);
+      }
+    } else {
       setProduct(mockProduct);
-      setLoading(false);
-    }, 1000);
+    }
+    
+    setLoading(false);
   }, []);
 
   const handleTrackPrice = () => {

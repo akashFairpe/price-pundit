@@ -32,7 +32,7 @@ const Search = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            prompt: "Analyze this image for space and organization problems",
+            prompt: prompt || "Analyze this image for space and organization problems",
             imageDataUrl: imageDataUrl
           })
         });

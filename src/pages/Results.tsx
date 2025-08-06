@@ -231,17 +231,18 @@ const Results = () => {
                       <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
                     </div>
 
-                    {/* Why it matches */}
-                    <div className="mb-4">
-                      <p className="text-sm font-medium mb-2 text-primary">Why this matches:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {product.reasons.slice(0, 2).map((reason, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {reason}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                     {/* AI Reasoning */}
+                     <div className="mb-4">
+                       <div className="flex items-start gap-2">
+                         <Award className="w-4 h-4 text-primary mt-0.5" />
+                         <div>
+                           <p className="text-sm font-medium mb-1 text-primary">AI Reasoning:</p>
+                           <p className="text-xs text-muted-foreground leading-relaxed">
+                             {product.reasons[0]}
+                           </p>
+                         </div>
+                       </div>
+                     </div>
 
                     {/* Features */}
                     <div className="mb-4">
@@ -283,9 +284,13 @@ const Results = () => {
                       <Button className="flex-1" onClick={() => navigate(`/product/${product.id}`)}>
                         View Details
                       </Button>
-                      <Button variant="outline" size="icon">
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
+                       <Button 
+                         variant="outline" 
+                         size="icon"
+                         onClick={() => window.open(product.vendors[0]?.url, '_blank')}
+                       >
+                         <ExternalLink className="w-4 h-4" />
+                       </Button>
                     </div>
                   </div>
                 </Card>
