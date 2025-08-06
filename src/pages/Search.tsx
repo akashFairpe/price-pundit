@@ -19,38 +19,110 @@ const Search = () => {
     if (!file) return;
 
     setIsProcessing(true);
-    // Simulate API call: POST /api/problem-image
-    setTimeout(() => {
-      setInterpretedQuery({
-        problemDetected: "Cluttered Workspace",
-        categories: ["Desk Organizer", "Cable Management", "Monitor Stand"],
-        confidence: 0.93
-      });
+    
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const imageDataUrl = e.target?.result as string;
+        
+        const response = await fetch('http://localhost:3000/api/case-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: "Analyze this image for space and organization problems",
+            imageDataUrl: imageDataUrl
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to analyze image');
+        }
+
+        const data = await response.json();
+        
+        if (data.success && data.mergedData?.length > 0) {
+          // Store the product data for the results page
+          localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
+          
+          setInterpretedQuery({
+            problemDetected: "Space Organization Issues Detected",
+            categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
+            confidence: 0.95
+          });
+          
+          toast({
+            title: "Image analyzed successfully!",
+            description: `Found ${data.mergedData.length} matching solutions for your space.`
+          });
+        } else {
+          throw new Error('No products found');
+        }
+        setIsProcessing(false);
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
       setIsProcessing(false);
       toast({
-        title: "Problem analyzed successfully!",
-        description: "We detected your space issue and found solutions."
+        title: "Analysis failed",
+        description: "Please try again or use text description instead.",
+        variant: "destructive"
       });
-    }, 2000);
+    }
   };
 
   const handlePromptSearch = async () => {
     if (!prompt.trim()) return;
     
     setIsProcessing(true);
-    // Simulate API call: POST /api/prompt-search
-    setTimeout(() => {
-      setInterpretedQuery({
-        problemDetected: "Need for organized workspace",
-        categories: ["Storage Solutions", "Desk Accessories", "Space-saving furniture"],
-        confidence: 0.88
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/case-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          imageDataUrl: null
+        })
       });
-      setIsProcessing(false);
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze prompt');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.mergedData?.length > 0) {
+        // Store the product data for the results page
+        localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
+        
+        setInterpretedQuery({
+          problemDetected: "Space Organization Need Identified",
+          categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
+          confidence: 0.92
+        });
+        
+        toast({
+          title: "Prompt analyzed successfully!",
+          description: `Found ${data.mergedData.length} matching solutions for your needs.`
+        });
+      } else {
+        throw new Error('No products found');
+      }
+    } catch (error) {
       toast({
-        title: "Need analyzed successfully!",
-        description: "We understand your space requirements."
+        title: "Analysis failed",
+        description: "Please try again with a different description.",
+        variant: "destructive"
       });
-    }, 1500);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleFindDeals = () => {

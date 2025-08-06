@@ -15,67 +15,75 @@ const Results = () => {
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const navigate = useNavigate();
 
-  // Simulated API data: GET /api/deals?query=desk
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Minimalist Study Desk with Storage",
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-      matchScore: 0.91,
-      reasons: ["Has bottle holder", "Dedicated pen space", "Laptop friendly surface"],
-      vendors: [
-        { name: "Amazon", price: "₹5,499", originalPrice: "₹7,999", url: "#", discount: "31%" },
-        { name: "Flipkart", price: "₹5,699", originalPrice: "₹8,199", url: "#", discount: "30%" },
-        { name: "Urban Ladder", price: "₹5,899", originalPrice: "₹8,499", url: "#", discount: "31%" }
-      ],
-      rating: 4.5,
-      reviews: 1247,
-      features: ["Engineered Wood", "2 Drawers", "Cable Management", "Easy Assembly"]
-    },
-    {
-      id: 2,
-      name: "Ergonomic Office Desk Pro",
-      image: "https://images.unsplash.com/photo-1541558869434-2840d308329a?w=400",
-      matchScore: 0.87,
-      reasons: ["Height adjustable", "Large workspace", "Built-in organizers"],
-      vendors: [
-        { name: "Amazon", price: "₹8,999", originalPrice: "₹12,999", url: "#", discount: "31%" },
-        { name: "Pepperfry", price: "₹9,299", originalPrice: "₹13,499", url: "#", discount: "31%" }
-      ],
-      rating: 4.7,
-      reviews: 892,
-      features: ["Adjustable Height", "Memory Foam", "Premium Wood", "10 Year Warranty"]
-    },
-    {
-      id: 3,
-      name: "Compact Student Desk",
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-      matchScore: 0.83,
-      reasons: ["Perfect size", "Storage compartments", "Budget friendly"],
-      vendors: [
-        { name: "Flipkart", price: "₹3,299", originalPrice: "₹4,999", url: "#", discount: "34%" },
-        { name: "Amazon", price: "₹3,499", originalPrice: "₹5,199", url: "#", discount: "33%" }
-      ],
-      rating: 4.2,
-      reviews: 623,
-      features: ["Compact Design", "2 Shelves", "Easy Assembly", "Durable"]
-    }
-  ];
+  // Helper function to clean image URLs
+  const cleanImageUrl = (url: string) => {
+    // Only use images with /images/I pattern
+    if (!url.includes('/images/I')) return null;
+    
+    // Remove everything after the first dot after the image ID
+    const match = url.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
+    return match ? match[1] + '.jpg' : null;
+  };
+
+  // Transform API data to component format
+  const transformApiData = (apiData: any[]) => {
+    return apiData.map((item, index) => {
+      // Clean and filter images
+      const cleanImages = item.images
+        ?.map(cleanImageUrl)
+        ?.filter(Boolean) || [];
+      
+      // Extract price number for sorting
+      const priceMatch = item.price?.price?.match(/₹([\d,]+)/);
+      const priceNumber = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : 0;
+      
+      return {
+        id: item.productId || index,
+        name: item.title || "Product",
+        image: cleanImages[0] || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
+        matchScore: parseInt(item.matchPercentage?.replace('%', '')) / 100 || 0.8,
+        reasons: [item.why_good_choice || "Great match for your needs"],
+        vendors: [{
+          name: "Amazon",
+          price: item.price?.price || "₹0",
+          originalPrice: item.price?.mrp || null,
+          url: item.productUrl || "#",
+          discount: item.price?.discount || null
+        }],
+        rating: item.rating?.rating || 4.0,
+        reviews: item.rating?.ratingCount || 0,
+        features: item.title?.split(' ').slice(0, 4) || ["Quality Product"],
+        originalPrice: priceNumber
+      };
+    });
+  };
 
   useEffect(() => {
-    // Simulate API loading
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setLoading(false);
-    }, 1500);
+    // Load search results from localStorage
+    const searchResults = localStorage.getItem('searchResults');
+    
+    if (searchResults) {
+      try {
+        const apiData = JSON.parse(searchResults);
+        const transformedProducts = transformApiData(apiData);
+        setProducts(transformedProducts);
+      } catch (error) {
+        console.error('Error parsing search results:', error);
+        setProducts([]);
+      }
+    } else {
+      setProducts([]);
+    }
+    
+    setLoading(false);
   }, []);
 
   const sortedProducts = [...products].sort((a, b) => {
     switch (sortBy) {
       case "price-low":
-        return parseInt(a.vendors[0].price.replace(/[₹,]/g, "")) - parseInt(b.vendors[0].price.replace(/[₹,]/g, ""));
+        return (a.originalPrice || 0) - (b.originalPrice || 0);
       case "price-high":
-        return parseInt(b.vendors[0].price.replace(/[₹,]/g, "")) - parseInt(a.vendors[0].price.replace(/[₹,]/g, ""));
+        return (b.originalPrice || 0) - (a.originalPrice || 0);
       case "rating":
         return b.rating - a.rating;
       default:
