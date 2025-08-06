@@ -18,59 +18,76 @@ const Search = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Just store the image, don't analyze yet
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageDataUrl = e.target?.result as string;
+      // Store image data for later analysis
+      sessionStorage.setItem('uploadedImage', imageDataUrl);
+      toast({
+        title: "Image uploaded successfully!",
+        description: "Now click 'Analyze Image' to find solutions."
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageAnalysis = async () => {
+    const imageDataUrl = sessionStorage.getItem('uploadedImage');
+    if (!imageDataUrl) {
+      toast({
+        title: "No image found",
+        description: "Please upload an image first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
-      // Convert file to base64
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const imageDataUrl = e.target?.result as string;
-        
-        const response = await fetch('http://localhost:3000/api/case-analysis', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: prompt || "Analyze this image for space and organization problems",
-            imageDataUrl: imageDataUrl
-          })
-        });
+      const response = await fetch('http://localhost:3000/api/case-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt || "Analyze this image for space and organization problems",
+          imageDataUrl: imageDataUrl
+        })
+      });
 
-        if (!response.ok) {
-          throw new Error('Failed to analyze image');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to analyze image');
+      }
 
-        const data = await response.json();
-        
-        if (data.success && data.mergedData?.length > 0) {
-          // Store the product data for the results page
-          localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
-          
-          setInterpretedQuery({
-            problemDetected: "Space Organization Issues Detected",
-            categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
-            confidence: 0.95
-          });
-          
-          toast({
-            title: "Image analyzed successfully!",
-            description: `Found ${data.mergedData.length} matching solutions for your space.`
-          });
-        } else {
-          throw new Error('No products found');
-        }
-        setIsProcessing(false);
-      };
+      const data = await response.json();
       
-      reader.readAsDataURL(file);
+      if (data.success && data.length > 0) {
+        // Store the product data for the results page
+        localStorage.setItem('searchResults', JSON.stringify(data));
+        
+        setInterpretedQuery({
+          problemDetected: "Space Organization Issues Detected",
+          categories: [...new Set(data.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
+          confidence: 0.95
+        });
+        
+        toast({
+          title: "Image analyzed successfully!",
+          description: `Found ${data.length} matching solutions for your space.`
+        });
+      } else {
+        throw new Error('No products found');
+      }
     } catch (error) {
-      setIsProcessing(false);
       toast({
         title: "Analysis failed",
         description: "Please try again or use text description instead.",
         variant: "destructive"
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -97,19 +114,19 @@ const Search = () => {
 
       const data = await response.json();
       
-      if (data.success && data.mergedData?.length > 0) {
+      if (data.length > 0) {
         // Store the product data for the results page
-        localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
+        localStorage.setItem('searchResults', JSON.stringify(data));
         
         setInterpretedQuery({
           problemDetected: "Space Organization Need Identified",
-          categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
+          categories: [...new Set(data.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
           confidence: 0.92
         });
         
         toast({
           title: "Prompt analyzed successfully!",
-          description: `Found ${data.mergedData.length} matching solutions for your needs.`
+          description: `Found ${data.length} matching solutions for your needs.`
         });
       } else {
         throw new Error('No products found');
@@ -161,7 +178,7 @@ const Search = () => {
                   Upload an image of your space problem (cluttered desk, disorganized room, etc.)
                 </p>
                 
-                <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors">
+                <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors mb-4">
                   <input
                     type="file"
                     accept="image/*"
@@ -175,6 +192,24 @@ const Search = () => {
                     <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
                   </label>
                 </div>
+                
+                <Button 
+                  onClick={handleImageAnalysis}
+                  disabled={!sessionStorage.getItem('uploadedImage') || isProcessing}
+                  className="w-full btn-hero-primary"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4 mr-2" />
+                      Analyze Image
+                    </>
+                  )}
+                </Button>
               </div>
             </Card>
 
