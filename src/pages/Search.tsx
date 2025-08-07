@@ -75,7 +75,7 @@ const Search = () => {
 
       const data = await response.json();
       
-      if (data.success && data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
         // Store the product data for the results page
         localStorage.setItem('searchResults', JSON.stringify(data));
         
