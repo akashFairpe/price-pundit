@@ -36,6 +36,13 @@ const Search = () => {
 
   const handleImageAnalysis = async () => {
     const imageDataUrl = uploadedImage || sessionStorage.getItem('uploadedImage');
+    
+    // Debug logging
+    console.log('handleImageAnalysis called');
+    console.log('uploadedImage state:', uploadedImage ? 'exists' : 'null');
+    console.log('sessionStorage uploadedImage:', sessionStorage.getItem('uploadedImage') ? 'exists' : 'null');
+    console.log('final imageDataUrl:', imageDataUrl ? 'exists' : 'null');
+    
     if (!imageDataUrl) {
       toast({
         title: "No image found",
@@ -47,16 +54,23 @@ const Search = () => {
 
     setIsProcessing(true);
     
+    const payload = {
+      prompt: prompt || "Analyze this image for space and organization problems",
+      imageDataUrl: imageDataUrl
+    };
+    
+    console.log('Sending payload:', {
+      prompt: payload.prompt,
+      imageDataUrl: payload.imageDataUrl ? 'IMAGE_DATA_EXISTS' : 'NULL'
+    });
+    
     try {
       const response = await fetch('http://localhost:3000/api/case-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          prompt: prompt || "Analyze this image for space and organization problems",
-          imageDataUrl: imageDataUrl
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
