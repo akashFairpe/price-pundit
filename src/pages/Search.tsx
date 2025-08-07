@@ -35,7 +35,7 @@ const Search = () => {
   };
 
   const handleImageAnalysis = async () => {
-    const imageDataUrl = sessionStorage.getItem('uploadedImage');
+    const imageDataUrl = uploadedImage || sessionStorage.getItem('uploadedImage');
     if (!imageDataUrl) {
       toast({
         title: "No image found",
