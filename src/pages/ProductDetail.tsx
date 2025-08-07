@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -132,9 +131,7 @@ const ProductDetail = () => {
             rating: foundProduct.rating?.rating || 4.0,
             reviews: foundProduct.rating?.ratingCount || 0,
             matchScore: parseInt(foundProduct.matchPercentage?.replace('%', '')) || 85,
-            features: foundProduct.keyFeature || foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
-            keyFeatures: foundProduct.keyFeature || [],
-            specifications: foundProduct.specifications || [],
+            features: foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
             dimensions: "Standard Size",
             weight: "Standard Weight", 
             warranty: "1 Year Warranty",
@@ -274,20 +271,18 @@ const ProductDetail = () => {
                 </div>
               </Card>
 
-              {/* Key Features */}
-              {product.keyFeatures && product.keyFeatures.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="font-semibold mb-3">Key Features</h4>
-                  <div className="grid grid-cols-1 gap-2">
-                    {product.keyFeatures.slice(0, 3).map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="w-4 h-4 text-success" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+              {/* Features */}
+              <div className="mb-6">
+                <h4 className="font-semibold mb-3">Key Features</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {product.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-success" />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
 
               {/* Specifications */}
               <div className="space-y-2 text-sm">
@@ -366,10 +361,10 @@ const ProductDetail = () => {
         </Card>
 
         {/* Tabs */}
-        <Tabs defaultValue="specifications" className="w-full">
+        <Tabs defaultValue="reviews" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="specifications">Specifications</TabsTrigger>
             <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
+            <TabsTrigger value="specifications">Specifications</TabsTrigger>
             <TabsTrigger value="price-history">Price History</TabsTrigger>
           </TabsList>
           
@@ -409,58 +404,42 @@ const ProductDetail = () => {
           
           <TabsContent value="specifications">
             <Card className="card-soft p-6">
-              <h3 className="text-xl font-semibold mb-4">Product Specifications</h3>
-              {product.specifications && product.specifications.length > 0 ? (
-                <div className="space-y-4">
-                  {product.specifications.map((spec, index) => (
-                    <div key={index} className="grid grid-cols-2 gap-4 py-3 border-b border-border last:border-b-0">
-                      <div className="font-medium text-muted-foreground">
-                        {Object.keys(spec)[0]}
-                      </div>
-                      <div className="font-medium">
-                        {String(Object.values(spec)[0])}
-                      </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-3">Product Details</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Material:</span>
+                      <span>Engineered Wood</span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Product Details</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Material:</span>
-                        <span>Engineered Wood</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Color:</span>
-                        <span>Walnut Brown</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Assembly:</span>
-                        <span>Required</span>
-                      </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Color:</span>
+                      <span>Walnut Brown</span>
                     </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-3">Dimensions</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Length:</span>
-                        <span>120 cm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Width:</span>
-                        <span>60 cm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Height:</span>
-                        <span>75 cm</span>
-                      </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Assembly:</span>
+                      <span>Required</span>
                     </div>
                   </div>
                 </div>
-              )}
+                <div>
+                  <h4 className="font-semibold mb-3">Dimensions</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Length:</span>
+                      <span>120 cm</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Width:</span>
+                      <span>60 cm</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Height:</span>
+                      <span>75 cm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </Card>
           </TabsContent>
           
