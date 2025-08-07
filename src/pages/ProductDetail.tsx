@@ -131,7 +131,8 @@ const ProductDetail = () => {
             rating: foundProduct.rating?.rating || 4.0,
             reviews: foundProduct.rating?.ratingCount || 0,
             matchScore: parseInt(foundProduct.matchPercentage?.replace('%', '')) || 85,
-            features: foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
+            features: foundProduct.keyFeature || foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
+            specifications: foundProduct.specifications || [],
             dimensions: "Standard Size",
             weight: "Standard Weight", 
             warranty: "1 Year Warranty",
@@ -361,10 +362,10 @@ const ProductDetail = () => {
         </Card>
 
         {/* Tabs */}
-        <Tabs defaultValue="reviews" className="w-full">
+        <Tabs defaultValue="specifications" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
             <TabsTrigger value="price-history">Price History</TabsTrigger>
           </TabsList>
           
@@ -404,42 +405,64 @@ const ProductDetail = () => {
           
           <TabsContent value="specifications">
             <Card className="card-soft p-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold mb-3">Product Details</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Material:</span>
-                      <span>Engineered Wood</span>
+              {product.specifications && product.specifications.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Product Details</h4>
+                    <div className="space-y-2">
+                      {product.specifications.slice(0, Math.ceil(product.specifications.length / 2)).map((spec, index) => {
+                        const key = Object.keys(spec)[0];
+                        const value = spec[key];
+                        return (
+                          <div key={index} className="flex justify-between">
+                            <span className="text-muted-foreground">{key}:</span>
+                            <span className="font-medium">{value}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Color:</span>
-                      <span>Walnut Brown</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Assembly:</span>
-                      <span>Required</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3">Additional Details</h4>
+                    <div className="space-y-2">
+                      {product.specifications.slice(Math.ceil(product.specifications.length / 2)).map((spec, index) => {
+                        const key = Object.keys(spec)[0];
+                        const value = spec[key];
+                        return (
+                          <div key={index} className="flex justify-between">
+                            <span className="text-muted-foreground">{key}:</span>
+                            <span className="font-medium">{value}</span>
+                          </div>
+                        );
+                      })}
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Warranty:</span>
+                        <span className="font-medium">{product.warranty}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-3">Dimensions</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Length:</span>
-                      <span>120 cm</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Width:</span>
-                      <span>60 cm</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Height:</span>
-                      <span>75 cm</span>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Product Details</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Dimensions:</span>
+                        <span className="font-medium">{product.dimensions}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Weight:</span>
+                        <span className="font-medium">{product.weight}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Warranty:</span>
+                        <span className="font-medium">{product.warranty}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </Card>
           </TabsContent>
           

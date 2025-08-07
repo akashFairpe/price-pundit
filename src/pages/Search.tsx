@@ -9,73 +9,51 @@ import Navigation from "@/components/Navigation";
 
 const Search = () => {
   const [prompt, setPrompt] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [interpretedQuery, setInterpretedQuery] = useState(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsProcessing(true);
-    
-    try {
-      // Convert file to base64
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const imageDataUrl = e.target?.result as string;
-        
-        const response = await fetch('http://localhost:3000/api/case-analysis', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: prompt || "Analyze this image for space and organization problems",
-            imageDataUrl: imageDataUrl
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to analyze image');
-        }
-
-        const data = await response.json();
-        
-        if (data.success && data.mergedData?.length > 0) {
-          // Store the product data for the results page
-          localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
-          
-          setInterpretedQuery({
-            problemDetected: "Space Organization Issues Detected",
-            categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
-            confidence: 0.95
-          });
-          
-          toast({
-            title: "Image analyzed successfully!",
-            description: `Found ${data.mergedData.length} matching solutions for your space.`
-          });
-        } else {
-          throw new Error('No products found');
-        }
-        setIsProcessing(false);
-      };
+    // Convert file to base64 and store for later use
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageDataUrl = e.target?.result as string;
+      setImageDataUrl(imageDataUrl);
+      setUploadedImage(imageDataUrl);
       
-      reader.readAsDataURL(file);
-    } catch (error) {
-      setIsProcessing(false);
       toast({
-        title: "Analysis failed",
-        description: "Please try again or use text description instead.",
-        variant: "destructive"
+        title: "Image uploaded successfully!",
+        description: "Now describe your problem and click Analyze to get solutions."
       });
-    }
+    };
+    
+    reader.readAsDataURL(file);
   };
 
-  const handlePromptSearch = async () => {
-    if (!prompt.trim()) return;
+  const handleAnalyze = async () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Please describe your problem",
+        description: "Enter a description of your space problem to analyze.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!imageDataUrl) {
+      toast({
+        title: "Please upload an image",
+        description: "Upload an image of your problem space to analyze.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsProcessing(true);
     
@@ -87,29 +65,29 @@ const Search = () => {
         },
         body: JSON.stringify({
           prompt: prompt,
-          imageDataUrl: null
+          imageDataUrl: imageDataUrl
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to analyze prompt');
+        throw new Error('Failed to analyze');
       }
 
       const data = await response.json();
       
-      if (data.success && data.mergedData?.length > 0) {
+      if (data.success && data.length > 0) {
         // Store the product data for the results page
-        localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
+        localStorage.setItem('searchResults', JSON.stringify(data));
         
         setInterpretedQuery({
-          problemDetected: "Space Organization Need Identified",
-          categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
-          confidence: 0.92
+          problemDetected: "Space Organization Issues Detected",
+          categories: [...new Set(data.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
+          confidence: 0.95
         });
         
         toast({
-          title: "Prompt analyzed successfully!",
-          description: `Found ${data.mergedData.length} matching solutions for your needs.`
+          title: "Analysis completed successfully!",
+          description: `Found ${data.length} matching solutions for your space.`
         });
       } else {
         throw new Error('No products found');
@@ -117,7 +95,7 @@ const Search = () => {
     } catch (error) {
       toast({
         title: "Analysis failed",
-        description: "Please try again with a different description.",
+        description: "Please try again with different image or description.",
         variant: "destructive"
       });
     } finally {
@@ -161,20 +139,38 @@ const Search = () => {
                   Upload an image of your space problem (cluttered desk, disorganized room, etc.)
                 </p>
                 
-                <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer block">
-                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-2">Click to upload or drag and drop</p>
-                    <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
-                  </label>
-                </div>
+                {!uploadedImage ? (
+                  <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer block">
+                      <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-2">Click to upload or drag and drop</p>
+                      <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="relative border-2 border-success rounded-xl overflow-hidden">
+                    <img src={uploadedImage} alt="Uploaded problem" className="w-full h-48 object-cover" />
+                    <div className="absolute top-2 right-2 bg-success text-white px-2 py-1 rounded text-sm">
+                      ✓ Uploaded
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setUploadedImage(null);
+                        setImageDataUrl(null);
+                      }}
+                      className="absolute bottom-2 right-2 bg-background/80 hover:bg-background px-3 py-1 rounded text-sm"
+                    >
+                      Change
+                    </button>
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -197,26 +193,36 @@ const Search = () => {
                   onChange={(e) => setPrompt(e.target.value)}
                   className="min-h-[120px] resize-none"
                 />
-                
-                <Button 
-                  onClick={handlePromptSearch}
-                  disabled={!prompt.trim() || isProcessing}
-                  className="w-full btn-hero-secondary"
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Analyze Prompt
-                    </>
-                  )}
-                </Button>
               </div>
             </Card>
+          </div>
+
+          {/* Unified Analyze Button */}
+          <div className="text-center mb-8">
+            <Button 
+              onClick={handleAnalyze}
+              disabled={!prompt.trim() || !imageDataUrl || isProcessing}
+              className="btn-hero-primary text-xl px-12 py-6"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-6 h-6 mr-3" />
+                  Analyze Problem
+                </>
+              )}
+            </Button>
+            {(!prompt.trim() || !imageDataUrl) && (
+              <p className="text-sm text-muted-foreground mt-2">
+                {!imageDataUrl && !prompt.trim() ? "Please upload an image and describe your problem" :
+                 !imageDataUrl ? "Please upload an image to analyze" :
+                 "Please describe your problem"}
+              </p>
+            )}
           </div>
 
           {/* Interpreted Query Result */}

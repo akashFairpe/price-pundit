@@ -52,8 +52,9 @@ const Results = () => {
         }],
         rating: item.rating?.rating || 4.0,
         reviews: item.rating?.ratingCount || 0,
-        features: item.title?.split(' ').slice(0, 4) || ["Quality Product"],
-        originalPrice: priceNumber
+        features: item.keyFeature || item.title?.split(' ').slice(0, 4) || ["Quality Product"],
+        originalPrice: priceNumber,
+        specifications: item.specifications || []
       };
     });
   };
