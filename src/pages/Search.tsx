@@ -11,6 +11,7 @@ const Search = () => {
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [interpretedQuery, setInterpretedQuery] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -22,8 +23,9 @@ const Search = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const imageDataUrl = e.target?.result as string;
-      // Store image data for later analysis
+      // Store image data and update state to show in UI
       sessionStorage.setItem('uploadedImage', imageDataUrl);
+      setUploadedImage(imageDataUrl);
       toast({
         title: "Image uploaded successfully!",
         description: "Now click 'Analyze Image' to find solutions."
@@ -178,24 +180,47 @@ const Search = () => {
                   Upload an image of your space problem (cluttered desk, disorganized room, etc.)
                 </p>
                 
-                <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors mb-4">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer block">
-                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-2">Click to upload or drag and drop</p>
-                    <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
-                  </label>
-                </div>
+{uploadedImage ? (
+                  <div className="border-2 border-primary rounded-xl p-4 mb-4">
+                    <img 
+                      src={uploadedImage} 
+                      alt="Uploaded" 
+                      className="w-full max-h-64 object-cover rounded-lg mb-4"
+                    />
+                    <div className="flex items-center justify-center gap-2 text-primary">
+                      <Camera className="w-4 h-4" />
+                      <span className="text-sm font-medium">Image uploaded successfully!</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setUploadedImage(null);
+                        sessionStorage.removeItem('uploadedImage');
+                      }}
+                      className="mt-2 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Upload different image
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-border rounded-xl p-8 hover:border-primary/50 transition-colors mb-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer block">
+                      <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-2">Click to upload or drag and drop</p>
+                      <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
+                    </label>
+                  </div>
+                )}
                 
                 <Button 
                   onClick={handleImageAnalysis}
-                  disabled={!sessionStorage.getItem('uploadedImage') || isProcessing}
+                  disabled={!uploadedImage || isProcessing}
                   className="w-full btn-hero-primary"
                 >
                   {isProcessing ? (
