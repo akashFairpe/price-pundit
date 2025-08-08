@@ -129,7 +129,8 @@ const ProductDetail = () => {
             currentImage: 0,
             aiReasoning: foundProduct.why_good_choice || "This product matches your needs perfectly.",
             rating: foundProduct.rating?.rating || 4.0,
-            reviews: foundProduct.rating?.ratingCount || 0,
+            reviews: foundProduct.reviews || [], // Include actual reviews from API
+            reviewCount: foundProduct.rating?.ratingCount || 0,
             matchScore: parseInt(foundProduct.matchPercentage?.replace('%', '')) || 85,
             features: foundProduct.keyFeature || foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
             specifications: foundProduct.specifications || [],
@@ -252,7 +253,7 @@ const ProductDetail = () => {
                     <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     <span className="font-semibold text-lg">{product.rating}</span>
                   </div>
-                  <span className="text-muted-foreground">({product.reviews} reviews)</span>
+                  <span className="text-muted-foreground">({product.reviewCount} reviews)</span>
                 </div>
                 <Badge variant="secondary">Best Seller</Badge>
               </div>
@@ -365,42 +366,69 @@ const ProductDetail = () => {
         <Tabs defaultValue="specifications" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews ({product.reviewCount})</TabsTrigger>
             <TabsTrigger value="price-history">Price History</TabsTrigger>
           </TabsList>
           
           <TabsContent value="reviews" className="space-y-4">
-            {mockReviews.map((review) => (
-              <Card key={review.id} className="card-soft p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold">{review.user}</span>
-                      {review.verified && (
-                        <Badge variant="secondary" className="text-xs">Verified Purchase</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
+            {product.reviews && product.reviews.length > 0 ? (
+              product.reviews.map((review, index) => (
+                <Card key={index} className="card-soft p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold">{review.reviewedUserName}</span>
+                        <Badge variant="secondary" className="text-xs">{review.verifedReview}</Badge>
                       </div>
-                      <span className="text-sm text-muted-foreground">{review.date}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-yellow-600">
+                          {review.ReviwedRating}
+                        </span>
+                        <span className="text-sm text-muted-foreground">{review.ReviewedDate}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <p className="text-muted-foreground mb-3">{review.comment}</p>
-                <div className="text-sm text-muted-foreground">
-                  {review.helpful} people found this helpful
-                </div>
-              </Card>
-            ))}
+                  <h6 className="font-medium mb-2">{review.ReviweTitle}</h6>
+                  <p className="text-muted-foreground mb-3">{review.reviewText}</p>
+                  <div className="text-sm text-muted-foreground">
+                    👍 Helpful
+                  </div>
+                </Card>
+              ))
+            ) : (
+              // Fallback to mock reviews if no real reviews available
+              mockReviews.map((review) => (
+                <Card key={review.id} className="card-soft p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold">{review.user}</span>
+                        {review.verified && (
+                          <Badge variant="secondary" className="text-xs">Verified Purchase</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-muted-foreground">{review.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground mb-3">{review.comment}</p>
+                  <div className="text-sm text-muted-foreground">
+                    {review.helpful} people found this helpful
+                  </div>
+                </Card>
+              ))
+            )}
           </TabsContent>
           
           <TabsContent value="specifications">
