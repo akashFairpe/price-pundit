@@ -10,6 +10,56 @@ import Navigation from "@/components/Navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+// Downsample large datasets to improve readability and performance (Largest-Triangle-Three-Buckets)
+interface PricePoint { time: number; dateLabel: string; price: number; fullDate?: string }
+function downsampleLTTB(data: PricePoint[], threshold: number): PricePoint[] {
+  if (!Array.isArray(data) || data.length === 0 || threshold <= 0 || threshold >= data.length) return data;
+  const sampled: PricePoint[] = [];
+  const bucketSize = (data.length - 2) / (threshold - 2);
+  let a = 0; // first point
+  sampled.push(data[a]);
+
+  for (let i = 0; i < threshold - 2; i++) {
+    const start = Math.floor((i + 1) * bucketSize) + 1;
+    const end = Math.floor((i + 2) * bucketSize) + 1;
+
+    let avgX = 0, avgY = 0;
+    const avgRangeLength = Math.max(end - start, 1);
+    for (let j = start; j < end; j++) {
+      const pt = data[j];
+      avgX += (pt.time ?? j);
+      avgY += pt.price;
+    }
+    avgX /= avgRangeLength;
+    avgY /= avgRangeLength;
+
+    const rangeOffs = Math.floor((i + 0) * bucketSize) + 1;
+    const rangeTo = Math.floor((i + 1) * bucketSize) + 1;
+
+    let maxArea = -1;
+    let maxAreaPointIndex = rangeOffs;
+
+    for (let j = rangeOffs; j < rangeTo; j++) {
+      const ax = data[a].time ?? a;
+      const ay = data[a].price;
+      const bx = data[j].time ?? j;
+      const by = data[j].price;
+
+      const area = Math.abs((ax - avgX) * (by - ay) - (ax - bx) * (avgY - ay)) * 0.5;
+      if (area > maxArea) {
+        maxArea = area;
+        maxAreaPointIndex = j;
+      }
+    }
+
+    sampled.push(data[maxAreaPointIndex]);
+    a = maxAreaPointIndex;
+  }
+
+  sampled.push(data[data.length - 1]);
+  return sampled;
+}
+
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -159,19 +209,20 @@ const ProductDetail = () => {
                   })
                   .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
                   .map((item: any) => {
-                    const d = new Date(item.date)
-                    const v = Number(item.val)
+                    const d = new Date(item.date);
+                    const v = Number(item.val);
                     return {
+                      time: d.getTime(),
                       dateLabel: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
                       price: Math.round(v / 100),
                       fullDate: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                    }
+                    };
                   })
               : [
-                { dateLabel: "Jan 2024", price: 7999, fullDate: "01 Jan 2024" },
-                { dateLabel: "Feb 2024", price: 7500, fullDate: "01 Feb 2024" },
-                { dateLabel: "Mar 2024", price: 6999, fullDate: "01 Mar 2024" },
-                { dateLabel: "Apr 2024", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499, fullDate: "01 Apr 2024" }
+                { time: new Date('2024-01-01').getTime(), dateLabel: "Jan 2024", price: 7999, fullDate: "01 Jan 2024" },
+                { time: new Date('2024-02-01').getTime(), dateLabel: "Feb 2024", price: 7500, fullDate: "01 Feb 2024" },
+                { time: new Date('2024-03-01').getTime(), dateLabel: "Mar 2024", price: 6999, fullDate: "01 Mar 2024" },
+                { time: new Date('2024-04-01').getTime(), dateLabel: "Apr 2024", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499, fullDate: "01 Apr 2024" }
               ]
           };
           
@@ -230,6 +281,11 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  // Prepare chart data with downsampling (LTTB)
+  const rawHistory: any[] = (product?.priceHistory as any[]) || [];
+  const MAX_POINTS = 400;
+  const chartData: any[] = rawHistory.length > MAX_POINTS ? downsampleLTTB(rawHistory as any, MAX_POINTS) : rawHistory;
 
   return (
     <div className="min-h-screen bg-background py-12">
@@ -543,10 +599,10 @@ const ProductDetail = () => {
               <div className="h-80 w-full">
                 <ScrollArea ref={scrollAreaRef} className="w-full h-full">
                   <div
-                    style={{ width: `${Math.max((product.priceHistory?.length || 0) * 28 * zoom, 600)}px`, height: '100%' }}
+                    style={{ width: `${Math.max((chartData?.length || 0) * 28 * zoom, 600)}px`, height: '100%' }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={product.priceHistory}>
+                      <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                         <XAxis 
                           dataKey="dateLabel"
@@ -575,8 +631,8 @@ const ProductDetail = () => {
                           dataKey="price" 
                           stroke="hsl(var(--primary))" 
                           strokeWidth={3}
-                          dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-                          activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                          dot={chartData.length <= 200 ? { fill: 'hsl(var(--primary))', strokeWidth: 2, r: 3 } : false}
+                          activeDot={chartData.length <= 200 ? { r: 5, fill: 'hsl(var(--primary))' } : false}
                         />
                       </LineChart>
                     </ResponsiveContainer>
