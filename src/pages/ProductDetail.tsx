@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Star, Heart, Share2, ShoppingCart, TrendingDown, Award, CheckCircle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Star, Heart, Share2, ShoppingCart, TrendingDown, Award, CheckCircle, ZoomIn, ZoomOut, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [zoom, setZoom] = useState(1);
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -150,13 +153,17 @@ const ProductDetail = () => {
             }],
             priceHistory: foundProduct.priceHistory
               ? foundProduct.priceHistory
-                  .filter((item: any) => typeof item?.val === 'number' && item.val !== -1 && item?.date)
+                  .filter((item: any) => {
+                    const v = Number(item?.val)
+                    return Number.isFinite(v) && v !== -1 && item?.date
+                  })
                   .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
                   .map((item: any) => {
                     const d = new Date(item.date)
+                    const v = Number(item.val)
                     return {
                       dateLabel: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-                      price: Math.max(0, Math.round(item.val / 100)),
+                      price: Math.round(v / 100),
                       fullDate: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
                     }
                   })
@@ -197,6 +204,15 @@ const ProductDetail = () => {
     });
   };
 
+  const handleZoomIn = () => setZoom((z) => Math.min(5, z * 1.25));
+  const handleZoomOut = () => setZoom((z) => Math.max(0.5, z / 1.25));
+  const handleResetView = () => {
+    setZoom(1);
+    setTimeout(() => {
+      const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+      if (viewport) viewport.scrollLeft = viewport.scrollWidth;
+    }, 0);
+  };
   if (loading) {
   return (
     <div className="min-h-screen bg-background py-12">
@@ -509,56 +525,83 @@ const ProductDetail = () => {
           
           <TabsContent value="price-history">
             <Card className="card-soft p-6">
-              <h4 className="font-semibold mb-4">Price Trend Over Time</h4>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold">Price Trend Over Time</h4>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={handleZoomOut} aria-label="Zoom out">
+                    <ZoomOut className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleZoomIn} aria-label="Zoom in">
+                    <ZoomIn className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" onClick={handleResetView} aria-label="Reset view">
+                    <RefreshCcw className="w-4 h-4 mr-2" />
+                    Reset
+                  </Button>
+                </div>
+              </div>
               <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={product.priceHistory}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis 
-                      dataKey="dateLabel"
-                      tick={{ fontSize: 12 }}
-                      interval="preserveStartEnd"
-                      minTickGap={16}
-                      tickMargin={8}
-                      className="text-muted-foreground"
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      className="text-muted-foreground"
-                      tickFormatter={(value) => `₹${value.toLocaleString()}`}
-                    />
-                    <Tooltip 
-                      formatter={(value, name) => [`₹${Number(value).toLocaleString()}`, 'Price']}
-                      labelFormatter={(label, payload) => `Date: ${payload?.[0]?.payload?.fullDate || label}`}
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="price" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={3}
-                      dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <ScrollArea ref={scrollAreaRef} className="w-full h-full">
+                  <div
+                    style={{ width: `${Math.max((product.priceHistory?.length || 0) * 28 * zoom, 600)}px`, height: '100%' }}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={product.priceHistory}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis 
+                          dataKey="dateLabel"
+                          tick={{ fontSize: 12 }}
+                          interval="preserveStartEnd"
+                          minTickGap={16}
+                          tickMargin={8}
+                          className="text-muted-foreground"
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          className="text-muted-foreground"
+                          tickFormatter={(value) => `₹${value.toLocaleString()}`}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Price']}
+                          labelFormatter={(label, payload) => `Date: ${payload?.[0]?.payload?.fullDate || label}`}
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--card))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="price" 
+                          stroke="hsl(var(--primary))" 
+                          strokeWidth={3}
+                          dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               </div>
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">Lowest Price</p>
-                  <p className="font-semibold">₹{Math.min(...product.priceHistory.map(p => p.price)).toLocaleString()}</p>
+                  <p className="font-semibold">
+                    {(() => { const arr = (product.priceHistory || []).map((p:any)=>p.price); return arr.length ? `₹${Math.min(...arr).toLocaleString()}` : '—'; })()}
+                  </p>
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">Highest Price</p>
-                  <p className="font-semibold">₹{Math.max(...product.priceHistory.map(p => p.price)).toLocaleString()}</p>
+                  <p className="font-semibold">
+                    {(() => { const arr = (product.priceHistory || []).map((p:any)=>p.price); return arr.length ? `₹${Math.max(...arr).toLocaleString()}` : '—'; })()}
+                  </p>
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">Current Price</p>
-                  <p className="font-semibold text-primary">₹{product.priceHistory[product.priceHistory.length - 1]?.price.toLocaleString()}</p>
+                  <p className="font-semibold text-primary">
+                    {(() => { const arr = (product.priceHistory || []).map((p:any)=>p.price); return arr.length ? `₹${arr[arr.length-1].toLocaleString()}` : '—'; })()}
+                  </p>
                 </div>
               </div>
               <div className="mt-4 p-3 bg-success/10 text-success rounded-lg text-sm">
