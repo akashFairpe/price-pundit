@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
@@ -147,11 +148,15 @@ const ProductDetail = () => {
               availability: "In Stock",
               url: foundProduct.productUrl || "#"
             }],
-            priceHistory: [
-              { date: "Jan", price: 7999 },
-              { date: "Feb", price: 7500 },
-              { date: "Mar", price: 6999 },
-              { date: "Apr", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499 }
+            priceHistory: foundProduct.priceHistory ? foundProduct.priceHistory.map(item => ({
+              date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              price: Math.round(item.val / 100), // Convert from paise to rupees
+              fullDate: new Date(item.date).toLocaleDateString()
+            })) : [
+              { date: "Jan", price: 7999, fullDate: "Jan 2024" },
+              { date: "Feb", price: 7500, fullDate: "Feb 2024" },
+              { date: "Mar", price: 6999, fullDate: "Mar 2024" },
+              { date: "Apr", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499, fullDate: "Apr 2024" }
             ]
           };
           
@@ -496,17 +501,57 @@ const ProductDetail = () => {
           
           <TabsContent value="price-history">
             <Card className="card-soft p-6">
-              <h4 className="font-semibold mb-4">Price Trend (Last 4 Months)</h4>
-              <div className="space-y-3">
-                {product.priceHistory.map((data, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <span className="text-muted-foreground">{data.date}</span>
-                    <span className="font-medium">₹{data.price.toLocaleString()}</span>
-                  </div>
-                ))}
+              <h4 className="font-semibold mb-4">Price Trend Over Time</h4>
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={product.priceHistory}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12 }}
+                      className="text-muted-foreground"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      className="text-muted-foreground"
+                      tickFormatter={(value) => `₹${value.toLocaleString()}`}
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [`₹${value.toLocaleString()}`, 'Price']}
+                      labelFormatter={(label) => `Date: ${label}`}
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="price" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={3}
+                      dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Lowest Price</p>
+                  <p className="font-semibold">₹{Math.min(...product.priceHistory.map(p => p.price)).toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Highest Price</p>
+                  <p className="font-semibold">₹{Math.max(...product.priceHistory.map(p => p.price)).toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Current Price</p>
+                  <p className="font-semibold text-primary">₹{product.priceHistory[product.priceHistory.length - 1]?.price.toLocaleString()}</p>
+                </div>
               </div>
               <div className="mt-4 p-3 bg-success/10 text-success rounded-lg text-sm">
-                💡 Price has dropped by ₹2,500 in the last 4 months. Great time to buy!
+                💡 Track price changes over time to find the best deals!
               </div>
             </Card>
           </TabsContent>
