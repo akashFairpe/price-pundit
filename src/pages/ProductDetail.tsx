@@ -148,16 +148,24 @@ const ProductDetail = () => {
               availability: "In Stock",
               url: foundProduct.productUrl || "#"
             }],
-            priceHistory: foundProduct.priceHistory ? foundProduct.priceHistory.map(item => ({
-              date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              price: Math.round(item.val / 100), // Convert from paise to rupees
-              fullDate: new Date(item.date).toLocaleDateString()
-            })) : [
-              { date: "Jan", price: 7999, fullDate: "Jan 2024" },
-              { date: "Feb", price: 7500, fullDate: "Feb 2024" },
-              { date: "Mar", price: 6999, fullDate: "Mar 2024" },
-              { date: "Apr", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499, fullDate: "Apr 2024" }
-            ]
+            priceHistory: foundProduct.priceHistory
+              ? foundProduct.priceHistory
+                  .filter((item: any) => typeof item?.val === 'number' && item.val !== -1 && item?.date)
+                  .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                  .map((item: any) => {
+                    const d = new Date(item.date)
+                    return {
+                      dateLabel: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+                      price: Math.max(0, Math.round(item.val / 100)),
+                      fullDate: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                    }
+                  })
+              : [
+                { dateLabel: "Jan 2024", price: 7999, fullDate: "01 Jan 2024" },
+                { dateLabel: "Feb 2024", price: 7500, fullDate: "01 Feb 2024" },
+                { dateLabel: "Mar 2024", price: 6999, fullDate: "01 Mar 2024" },
+                { dateLabel: "Apr 2024", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499, fullDate: "01 Apr 2024" }
+              ]
           };
           
           setProduct(transformedProduct);
@@ -507,8 +515,11 @@ const ProductDetail = () => {
                   <LineChart data={product.priceHistory}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis 
-                      dataKey="date" 
+                      dataKey="dateLabel"
                       tick={{ fontSize: 12 }}
+                      interval="preserveStartEnd"
+                      minTickGap={16}
+                      tickMargin={8}
                       className="text-muted-foreground"
                     />
                     <YAxis 
@@ -517,8 +528,8 @@ const ProductDetail = () => {
                       tickFormatter={(value) => `₹${value.toLocaleString()}`}
                     />
                     <Tooltip 
-                      formatter={(value, name) => [`₹${value.toLocaleString()}`, 'Price']}
-                      labelFormatter={(label) => `Date: ${label}`}
+                      formatter={(value, name) => [`₹${Number(value).toLocaleString()}`, 'Price']}
+                      labelFormatter={(label, payload) => `Date: ${payload?.[0]?.payload?.fullDate || label}`}
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
