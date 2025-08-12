@@ -169,12 +169,15 @@ const ProductDetail = () => {
         // Transform API data to component format
         const cleanImages = foundProduct.images
           ?.map((url: string) => {
-            if (!url.includes('/images/I')) return null;
-            const match = url.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
+            if (!url) return null;
+            let final = url.trim();
+            if (final.startsWith('/I/')) final = `https://m.media-amazon.com/images${final}`;
+            if (final.startsWith('/images/I/')) final = `https://m.media-amazon.com${final}`;
+            if (!final.startsWith('https://m.media-amazon.com/images/I/')) return null;
+            const match = final.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
             return match ? match[1] + '.jpg' : null;
           })
           ?.filter(Boolean) || [];
-
         const transformedProduct: any = {
           id: foundProduct.productId,
           name: foundProduct.title || "Product",

@@ -15,16 +15,22 @@ const Results = () => {
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const navigate = useNavigate();
 
-  // Helper function to clean image URLs
+  // Helper function to clean image URLs (handles Amazon and relative paths)
   const cleanImageUrl = (url: string) => {
-    // Only use images with /images/I pattern
-    if (!url.includes('/images/I')) return null;
-    
-    // Remove everything after the first dot after the image ID
-    const match = url.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
+    if (!url) return null;
+    let final = url.trim();
+
+    // If relative like "/I/.." or "/images/I/..." prefix the Amazon domain
+    if (final.startsWith('/I/')) final = `https://m.media-amazon.com/images${final}`;
+    if (final.startsWith('/images/I/')) final = `https://m.media-amazon.com${final}`;
+
+    // Only accept m.media-amazon product images with /images/I/
+    if (!final.startsWith('https://m.media-amazon.com/images/I/')) return null;
+
+    // Normalize by stripping size suffixes like ._SS100_ and keeping .jpg
+    const match = final.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
     return match ? match[1] + '.jpg' : null;
   };
-
   // Transform API data to component format
   const transformApiData = (apiData: any[]) => {
     return apiData.map((item, index) => {
@@ -65,8 +71,9 @@ const Results = () => {
     
     if (searchResults) {
       try {
-        const apiData = JSON.parse(searchResults);
-        const transformedProducts = transformApiData(apiData);
+        const raw = JSON.parse(searchResults);
+        const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.dealFound) ? raw.dealFound : []);
+        const transformedProducts = transformApiData(list);
         setProducts(transformedProducts);
       } catch (error) {
         console.error('Error parsing search results:', error);
