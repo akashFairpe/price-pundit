@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -67,6 +67,7 @@ const ProductDetail = () => {
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   // Simulated API data: GET /api/product/:id
   const mockProduct = {
@@ -156,90 +157,85 @@ const ProductDetail = () => {
   ];
 
   useEffect(() => {
-    // Get product data from URL params or localStorage
-    const searchResults = localStorage.getItem('searchResults');
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = window.location.pathname.split('/').pop();
-    
-    if (searchResults && productId) {
+
+
+    async function fetchProduct(productId: string) {
+      setLoading(true);
       try {
-        const apiData = JSON.parse(searchResults);
-        const foundProduct = apiData.find(item => item.productId === productId);
-        
-        if (foundProduct) {
-          // Transform API data to component format
-          const cleanImages = foundProduct.images
-            ?.map(url => {
-              if (!url.includes('/images/I')) return null;
-              const match = url.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
-              return match ? match[1] + '.jpg' : null;
-            })
-            ?.filter(Boolean) || [];
-          
-          const transformedProduct = {
-            id: foundProduct.productId,
-            name: foundProduct.title || "Product",
-            images: cleanImages.length > 0 ? cleanImages : ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800"],
-            currentImage: 0,
-            aiReasoning: foundProduct.why_good_choice || "This product matches your needs perfectly.",
+        const res = await fetch(`http://localhost:3000/api/product/${productId}`);
+        if (!res.ok) throw new Error('Product not found');
+        const foundProduct = await res.json();
+
+        // Transform API data to component format
+        const cleanImages = foundProduct.images
+          ?.map((url: string) => {
+            if (!url.includes('/images/I')) return null;
+            const match = url.match(/(https:\/\/m\.media-amazon\.com\/images\/I\/[^.]+)/);
+            return match ? match[1] + '.jpg' : null;
+          })
+          ?.filter(Boolean) || [];
+
+        const transformedProduct: any = {
+          id: foundProduct.productId,
+          name: foundProduct.title || "Product",
+          images: cleanImages.length > 0 ? cleanImages : ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800"],
+          currentImage: 0,
+          aiReasoning: foundProduct.why_good_choice || "This product matches your needs perfectly.",
+          rating: foundProduct.rating?.rating || 4.0,
+          reviews: foundProduct.reviews || [],
+          reviewCount: foundProduct.rating?.ratingCount || 0,
+          matchScore: parseInt(foundProduct.matchPercentage?.replace('%', '')) || 85,
+          features: foundProduct.keyFeature || foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
+          specifications: foundProduct.specifications || [],
+          dimensions: "Standard Size",
+          weight: "Standard Weight",
+          warranty: "1 Year Warranty",
+          vendors: [{
+            name: "Amazon",
+            price: foundProduct.price?.price || "₹0",
+            originalPrice: foundProduct.price?.mrp || null,
+            discount: foundProduct.price?.discount || null,
             rating: foundProduct.rating?.rating || 4.0,
-            reviews: foundProduct.reviews || [], // Include actual reviews from API
-            reviewCount: foundProduct.rating?.ratingCount || 0,
-            matchScore: parseInt(foundProduct.matchPercentage?.replace('%', '')) || 85,
-            features: foundProduct.keyFeature || foundProduct.title?.split(' ').slice(0, 6) || ["Quality Product"],
-            specifications: foundProduct.specifications || [],
-            dimensions: "Standard Size",
-            weight: "Standard Weight", 
-            warranty: "1 Year Warranty",
-            vendors: [{
-              name: "Amazon",
-              price: foundProduct.price?.price || "₹0",
-              originalPrice: foundProduct.price?.mrp || null,
-              discount: foundProduct.price?.discount || null,
-              rating: foundProduct.rating?.rating || 4.0,
-              shipping: "Free Delivery",
-              availability: "In Stock",
-              url: foundProduct.productUrl || "#"
-            }],
-            priceHistory: foundProduct.priceHistory
-              ? foundProduct.priceHistory
-                  .filter((item: any) => {
-                    const v = Number(item?.val)
-                    return Number.isFinite(v) && v !== -1 && item?.date
-                  })
-                  .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                  .map((item: any) => {
-                    const d = new Date(item.date);
-                    const v = Number(item.val);
-                    return {
-                      time: d.getTime(),
-                      dateLabel: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-                      price: Math.round(v / 100),
-                      fullDate: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                    };
-                  })
-              : [
-                { time: new Date('2024-01-01').getTime(), dateLabel: "Jan 2024", price: 7999, fullDate: "01 Jan 2024" },
-                { time: new Date('2024-02-01').getTime(), dateLabel: "Feb 2024", price: 7500, fullDate: "01 Feb 2024" },
-                { time: new Date('2024-03-01').getTime(), dateLabel: "Mar 2024", price: 6999, fullDate: "01 Mar 2024" },
-                { time: new Date('2024-04-01').getTime(), dateLabel: "Apr 2024", price: parseInt(foundProduct.price?.price?.replace(/[₹,]/g, '')) || 5499, fullDate: "01 Apr 2024" }
-              ]
-          };
-          
-          setProduct(transformedProduct);
-        } else {
-          setProduct(mockProduct);
-        }
-      } catch (error) {
-        console.error('Error parsing product data:', error);
-        setProduct(mockProduct);
+            shipping: "Free Delivery",
+            availability: "In Stock",
+            url: foundProduct.productUrl || "#"
+          }],
+          priceHistory: foundProduct.priceHistory
+            ? foundProduct.priceHistory
+                .filter((item: any) => {
+                  const v = Number(item?.val);
+                  return Number.isFinite(v) && v !== -1 && item?.date;
+                })
+                .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .map((item: any) => {
+                  const d = new Date(item.date);
+                  const v = Number(item.val);
+                  return {
+                    time: d.getTime(),
+                    dateLabel: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+                    price: Math.round(v / 100),
+                    fullDate: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                  };
+                })
+            : []
+        };
+
+        setProduct(transformedProduct);
+      } catch (err) {
+        console.error('Failed to fetch product:', err);
+        setProduct(null);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      setProduct(mockProduct);
     }
-    
-    setLoading(false);
-  }, []);
+
+    if (id) {
+      fetchProduct(id as string);
+    } else {
+      setLoading(false);
+      setProduct(null);
+    }
+  }, [id]);
 
   const handleTrackPrice = () => {
     toast({
@@ -286,6 +282,22 @@ const ProductDetail = () => {
   const rawHistory: any[] = (product?.priceHistory as any[]) || [];
   const MAX_POINTS = 400;
   const chartData: any[] = rawHistory.length > MAX_POINTS ? downsampleLTTB(rawHistory as any, MAX_POINTS) : rawHistory;
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background py-12">
+        <div className="container mx-auto px-4">
+          <Card className="card-soft p-8 text-center">
+            <h2 className="text-2xl font-semibold mb-2">Product not found</h2>
+            <p className="text-muted-foreground mb-4">We couldn't load this product. It may have been removed or is temporarily unavailable.</p>
+            <div className="flex justify-center gap-2">
+              <Button variant="outline" onClick={() => navigate(-1)}>Go Back</Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background py-12">

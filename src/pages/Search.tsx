@@ -75,19 +75,19 @@ const Search = () => {
 
       const data = await response.json();
       
-      if (data.success && data.mergedData && Array.isArray(data.mergedData) && data.mergedData.length > 0) {
+      if (data.success && data.dealFound && Array.isArray(data.dealFound) && data.dealFound.length > 0) {
         // Store the product data for the results page
-        localStorage.setItem('searchResults', JSON.stringify(data.mergedData));
+        localStorage.setItem('searchResults', JSON.stringify(data.dealFound));
         
         setInterpretedQuery({
           problemDetected: "Space Organization Issues Detected",
-          categories: [...new Set(data.mergedData.slice(0, 5).map(product => product.title.split(' ').slice(0, 2).join(' ')))],
+          categories: [...new Set(data.dealFound.slice(0, 5).map((product: any) => product.title.split(' ').slice(0, 2).join(' ')))],
           confidence: 0.95
         });
         
         toast({
           title: "Analysis completed successfully!",
-          description: `Found ${data.mergedData.length} matching solutions for your space.`
+          description: `Found ${data.dealFound.length} matching solutions for your space.`
         });
       } else {
         throw new Error('No products found');
