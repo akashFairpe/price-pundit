@@ -9,6 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { apiUrl } from "@/lib/api";
 
 // Downsample large datasets to improve readability and performance (Largest-Triangle-Three-Buckets)
 interface PricePoint { time: number; dateLabel: string; price: number; fullDate?: string }
@@ -162,7 +163,7 @@ const ProductDetail = () => {
     async function fetchProduct(productId: string) {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3000/api/product/${productId}`);
+        const res = await fetch(apiUrl(`/api/product/${productId}`));
         if (!res.ok) throw new Error('Product not found');
         const foundProduct = await res.json();
 

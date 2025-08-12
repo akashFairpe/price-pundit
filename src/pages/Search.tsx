@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { apiUrl } from "@/lib/api";
 
 const Search = () => {
   const [prompt, setPrompt] = useState("");
@@ -58,7 +59,7 @@ const Search = () => {
     setIsProcessing(true);
     
     try {
-      const response = await fetch('http://localhost:3000/api/case-analysis', {
+      const response = await fetch(apiUrl('/api/case-analysis'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
